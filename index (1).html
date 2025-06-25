@@ -1,0 +1,503 @@
+<!-- ✅ Loan Calculator Pro - Final Full Version with Amortization Chart --><!-- All features included: Icons, Language, Chart, Smart Suggestion, PDF, Ads, Auto Loan Amount, Full EMI Breakdown --><!DOCTYPE html><html lang="en" data-lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Loan Calculator Pro</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+
+    body {
+
+      font-family: 'Roboto', sans-serif;
+
+      background: #e3f2fd;
+
+      margin: 0;
+
+      padding: 0;
+
+      color: #333;
+
+    }
+
+    header {
+
+      background: #0288d1;
+
+      color: white;
+
+      padding: 15px;
+
+      text-align: center;
+
+      position: relative;
+
+    }
+
+    .lang-toggle {
+
+      position: absolute;
+
+      top: 15px;
+
+      right: 20px;
+
+    }
+
+    .lang-toggle select {
+
+      padding: 5px;
+
+    }
+
+    h1, p { margin: 0; }
+
+    .slogan { font-size: 14px; }
+
+    .loan-grid {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      justify-content: center;
+
+      gap: 15px;
+
+      padding: 20px;
+
+    }
+
+    .loan-card {
+
+      width: 100px;
+
+      padding: 10px;
+
+      text-align: center;
+
+      background: white;
+
+      border-radius: 8px;
+
+      box-shadow: 0 0 5px #ccc;
+
+      cursor: pointer;
+
+    }
+
+    .loan-card:hover { background: #e1f5fe; }
+
+    .container {
+
+      max-width: 600px;
+
+      margin: 20px auto;
+
+      padding: 20px;
+
+      background: #fff;
+
+      border-radius: 10px;
+
+      box-shadow: 0 0 10px #ccc;
+
+      display: none;
+
+    }
+
+    .input-group { margin-bottom: 15px; }
+
+    label { display: block; margin-bottom: 5px; }
+
+    input, select {
+
+      width: 100%;
+
+      padding: 10px;
+
+      border-radius: 5px;
+
+      border: 1px solid #ccc;
+
+    }
+
+    button {
+
+      background: #0288d1;
+
+      color: white;
+
+      padding: 10px;
+
+      width: 100%;
+
+      border: none;
+
+      border-radius: 5px;
+
+      cursor: pointer;
+
+    }
+
+    .results, .chart-container, .suggestions, .reminderBox, .amortization { margin-top: 20px; }
+
+    canvas { max-width: 100%; }
+
+    .back-btn {
+
+      background: #ccc;
+
+      margin-top: 10px;
+
+    }
+
+    .ads {
+
+      background: #fff8e1;
+
+      padding: 10px;
+
+      margin: 10px 0;
+
+      border-left: 5px solid #ffc107;
+
+    }
+
+    table {
+
+      width: 100%;
+
+      border-collapse: collapse;
+
+    }
+
+    th, td {
+
+      padding: 8px;
+
+      border: 1px solid #ccc;
+
+      text-align: center;
+
+    }
+
+    th {
+
+      background-color: #0288d1;
+
+      color: white;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+
+    <h1 data-text="heading">Loan Calculator Pro</h1>
+
+    <p class="slogan" data-text="tagline">All-in-One EMI Smart Calculator</p>
+
+    <div class="lang-toggle">
+
+      <select onchange="changeLanguage(this.value)">
+
+        <option value="en">🇬🇧 English</option>
+
+        <option value="hi">🇮🇳 हिंदी</option>
+
+      </select>
+
+    </div>
+
+  </header>  <div class="ads">🔸 Advertisement</div>  <div class="loan-grid" id="loanGrid"></div>  <div class="container" id="calculator">
+
+    <div class="ads">🔸 Advertisement</div>
+
+    <h2 id="selectedLoan">Loan Type</h2>
+
+    <div class="input-group"><label>Total Price / Asset Value (₹)</label><input type="number" id="price" oninput="autoUpdateLoan()" /></div>
+
+    <div class="input-group"><label>Down Payment (₹)</label><input type="number" id="downPayment" oninput="autoUpdateLoan()" /></div>
+
+    <div class="input-group"><label>Loan Amount (₹)</label><input type="number" id="amount" readonly /></div>
+
+    <div class="input-group"><label>Interest Rate (%)</label><input type="number" id="rate" /></div>
+
+    <div class="input-group"><label>Tenure (in Years)</label><input type="number" id="tenure" /></div>
+
+    <div class="input-group"><label>Monthly Income (₹)</label><input type="number" id="income" /></div>
+
+    <div class="input-group"><label>Interest Type</label>
+
+      <select id="interestType">
+
+        <option value="reducing">Reducing</option>
+
+        <option value="flat">Flat</option>
+
+      </select>
+
+    </div>
+
+    <button onclick="calculateEMI()">Calculate EMI</button>
+
+    <div class="results" id="resultsBox"></div>
+
+    <div class="suggestions" id="suggestionBox"></div>
+
+    <div class="chart-container"><canvas id="emiChart"></canvas></div>
+
+    <div class="amortization" id="amortizationTable"></div>
+
+    <div class="reminderBox" id="reminderBox"></div>
+
+    <div class="ads">🔸 Advertisement</div>
+
+    <button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+  </div>  <script>
+
+    const loans = [
+
+      { icon: '🏠', name: 'Home Loan' }, { icon: '🚗', name: 'Car Loan' },
+
+      { icon: '🏍️', name: 'Bike Loan' }, { icon: '🎓', name: 'Education Loan' },
+
+      { icon: '💳', name: 'Credit Card Loan' }, { icon: '📱', name: 'Mudra Loan' },
+
+      { icon: '🏢', name: 'Business Loan' }, { icon: '🧾', name: 'MSME Loan' },
+
+      { icon: '🛍️', name: 'Consumer Loan' }, { icon: '👨‍👩‍👧', name: 'Personal Loan' }
+
+    ];
+
+    loans.forEach(loan => {
+
+      const div = document.createElement('div');
+
+      div.className = 'loan-card';
+
+      div.innerHTML = `<div style="font-size: 30px">${loan.icon}</div><div>${loan.name}</div>`;
+
+      div.onclick = () => openCalculator(loan.name);
+
+      document.getElementById('loanGrid').appendChild(div);
+
+    });
+
+    function openCalculator(name) {
+
+      document.getElementById('calculator').style.display = 'block';
+
+      document.getElementById('loanGrid').style.display = 'none';
+
+      document.getElementById('selectedLoan').innerText = name;
+
+    }
+
+    function goBack() {
+
+      document.getElementById('calculator').style.display = 'none';
+
+      document.getElementById('loanGrid').style.display = 'flex';
+
+    }
+
+    function autoUpdateLoan() {
+
+      const price = +document.getElementById('price').value;
+
+      const down = +document.getElementById('downPayment').value;
+
+      const loanAmt = price - down;
+
+      document.getElementById('amount').value = loanAmt > 0 ? loanAmt : 0;
+
+    }
+
+    function calculateEMI() {
+
+      const P = +document.getElementById('amount').value;
+
+      const R = +document.getElementById('rate').value / 12 / 100;
+
+      const N = +document.getElementById('tenure').value * 12;
+
+      const income = +document.getElementById('income').value;
+
+      const type = document.getElementById('interestType').value;
+
+      let emi = 0, totalPayment = 0, totalInterest = 0, tableHTML = "";
+
+      let schedule = [];
+
+      if (type === 'reducing') {
+
+        emi = (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
+
+        let balance = P;
+
+        for (let i = 1; i <= N; i++) {
+
+          let interest = balance * R;
+
+          let principal = emi - interest;
+
+          balance -= principal;
+
+          schedule.push({ month: i, principal, interest, balance: Math.max(0, balance) });
+
+        }
+
+      } else {
+
+        totalInterest = (P * R * N);
+
+        totalPayment = P + totalInterest;
+
+        emi = totalPayment / N;
+
+        const monthlyInterest = totalInterest / N;
+
+        const monthlyPrincipal = P / N;
+
+        let balance = P;
+
+        for (let i = 1; i <= N; i++) {
+
+          balance -= monthlyPrincipal;
+
+          schedule.push({ month: i, principal: monthlyPrincipal, interest: monthlyInterest, balance: Math.max(0, balance) });
+
+        }
+
+      }
+
+      totalPayment = emi * N;
+
+      totalInterest = totalPayment - P;
+
+      document.getElementById('resultsBox').innerHTML =
+
+        `<p>📅 Monthly EMI: ₹${emi.toFixed(2)}</p>
+
+         <p>💰 Total Payable: ₹${totalPayment.toFixed(2)}</p>
+
+         <p>📈 Total Interest: ₹${totalInterest.toFixed(2)}</p>`;
+
+      const limit = income * 0.4;
+
+      const suggestion = emi <= limit ? "✅ EMI is safe." : "⚠️ EMI too high vs income.";
+
+      document.getElementById('suggestionBox').innerHTML = `<strong>💡 Suggestion:</strong> ${suggestion}`;
+
+      showChart(P, totalInterest);
+
+      document.getElementById('reminderBox').innerHTML = `<button onclick="downloadPDF(${emi.toFixed(2)}, ${totalPayment.toFixed(2)}, ${totalInterest.toFixed(2)}, '${suggestion}')">📄 Download Reminder PDF</button>`;
+
+      // Amortization Table
+
+      tableHTML += `<h3>📊 EMI Payment Schedule</h3><table><tr><th>Month</th><th>Principal (₹)</th><th>Interest (₹)</th><th>Balance (₹)</th></tr>`;
+
+      schedule.forEach(row => {
+
+        tableHTML += `<tr><td>${row.month}</td><td>${row.principal.toFixed(2)}</td><td>${row.interest.toFixed(2)}</td><td>${row.balance.toFixed(2)}</td></tr>`;
+
+      });
+
+      tableHTML += `</table>`;
+
+      document.getElementById("amortizationTable").innerHTML = tableHTML;
+
+    }
+
+    let chart;
+
+    function showChart(principal, interest) {
+
+      const ctx = document.getElementById('emiChart').getContext('2d');
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+
+        type: 'pie',
+
+        data: {
+
+          labels: ['Principal', 'Interest'],
+
+          datasets: [{
+
+            data: [principal, interest],
+
+            backgroundColor: ['#0288d1', '#ffc107']
+
+          }]
+
+        },
+
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+
+      });
+
+    }
+
+    async function downloadPDF(emi, total, interest, suggestion) {
+
+      const { jsPDF } = window.jspdf;
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(14);
+
+      doc.text("📄 EMI Reminder", 20, 20);
+
+      doc.text(`Monthly EMI: ₹${emi}`, 20, 40);
+
+      doc.text(`Total Payment: ₹${total}`, 20, 60);
+
+      doc.text(`Total Interest: ₹${interest}`, 20, 80);
+
+      doc.text(`Suggestion: ${suggestion}`, 20, 100);
+
+      doc.save("EMI_Reminder.pdf");
+
+    }
+
+    const translations = {
+
+      en: { heading: "Loan Calculator Pro", tagline: "All-in-One EMI Smart Calculator" },
+
+      hi: { heading: "ऋण कैलकुलेटर प्रो", tagline: "सभी ऋणों के लिए स्मार्ट ईएमआई कैलकुलेटर" }
+
+    };
+
+    function changeLanguage(lang) {
+
+      document.documentElement.setAttribute('data-lang', lang);
+
+      document.querySelector('[data-text="heading"]').innerText = translations[lang].heading;
+
+      document.querySelector('[data-text="tagline"]').innerText = translations[lang].tagline;
+
+    }
+
+  </script></body>
+
+</html>
